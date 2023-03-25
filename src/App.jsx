@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import Searchbar from './components/Searchbar/Searchbar';
 import ImageGallery from './components/ImageGallery/ImageGallery';
 import Loader from './components/Loader/Loader';
@@ -7,93 +7,79 @@ import Modal from './components/Modal/Modal';
 import { fetchImages } from './components/utils/pixabayApi';
 import { AppContainer } from './components/Global.styled';
 
-class App extends Component {
-  state = {
-    searchQuery: '',
-    page: 1,
-    images: [],
-    selectedImage: null,
-    showModal: false,
-    isLoading: false,
-    largeImageURL: '',
-  };
+function App() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [images, setImages] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [largeImageURL, setLargeImageURL] = useState('');
 
-  componentDidUpdate(_, prevState) {
-    const { searchQuery, page } = this.state;
-
-    if (
-      searchQuery.trim() !== '' &&
-      (prevState.searchQuery !== searchQuery || prevState.page !== page)
-    ) {
-      this.setState({ isLoading: true });
+  useEffect(() => {
+    if (searchQuery.trim() !== '') {
+      setIsLoading(true);
 
       fetchImages(searchQuery, page)
-        .then(data => {
-          this.setState(prevState => ({
-            images: [...prevState.images, ...data],
-          }));
+        .then((data) => {
+          setImages((prevImages) => [...prevImages, ...data]);
         })
-        .catch(error => {
+        .catch((error) => {
           console.log(error);
         })
         .finally(() => {
-          this.setState({ isLoading: false });
+          setIsLoading(false);
         });
     }
-  }
+  }, [searchQuery, page]);
 
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
+  // const toggleModal = () => {
+  //   setShowModal((prevShowModal) => !prevShowModal);
+  // };
+
+  const handleOpenModal = (largeImageURL) => {
+    setLargeImageURL(largeImageURL);
   };
 
-  handleOpenModal = largeImageURL => {
-    this.setState({ largeImageURL });
+  const handleCloseModal = () => {
+    setSelectedImage(null);
+    setShowModal(false);
+    setLargeImageURL('');
   };
 
-  handleCloseModal = () => {
-    this.setState({ selectedImage: null, showModal: false, largeImageURL: '' });
+  const handleSearchFormSubmit = (query) => {
+    setSearchQuery(query);
+    setPage(1);
+    setImages([]);
   };
 
-  handleSearchFormSubmit = query => {
-    this.setState({ searchQuery: query, page: 1, images: [] });
+  const handleLoadMoreBtnClick = () => {
+    setPage((prevPage) => prevPage + 1);
   };
 
-  handleLoadMoreBtnClick = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
-  };
+  // const handleImageClick = (image) => {
+  //   setSelectedImage(image);
+  //   setShowModal(true);
+  // };
 
-  handleImageClick = image => {
-    this.setState({ selectedImage: image, showModal: true });
-  };
-
-  render() {
-    const { images, isLoading, selectedImage, showModal, largeImageURL } =
-      this.state;
-
-    return (
-      <AppContainer>
-        <Searchbar onSubmit={this.handleSearchFormSubmit} />
-        <ImageGallery images={images} onClick={this.handleOpenModal} />
-        {largeImageURL && (
-          <Modal
-            largeImageURL={largeImageURL}
-            onClose={this.handleCloseModal}
-          />
-        )}
-        {isLoading && <Loader />}
-        {images.length > 0 && !isLoading && (
-          <Button onClick={this.handleLoadMoreBtnClick} />
-        )}
-        {showModal && selectedImage && (
-          <Modal onClose={this.handleCloseModal}>
-            <img src={selectedImage.largeImageURL} alt={selectedImage.tags} />
-          </Modal>
-        )}
-      </AppContainer>
-    );
-  }
+  return (
+    <AppContainer>
+      <Searchbar onSubmit={handleSearchFormSubmit} />
+      <ImageGallery images={images} onClick={handleOpenModal} />
+      {largeImageURL && (
+        <Modal largeImageURL={largeImageURL} onClose={handleCloseModal} />
+      )}
+      {isLoading && <Loader />}
+      {images.length > 0 && !isLoading && (
+        <Button onClick={handleLoadMoreBtnClick} />
+      )}
+      {showModal && selectedImage && (
+        <Modal onClose={handleCloseModal}>
+          <img src={selectedImage.largeImageURL} alt={selectedImage.tags} />
+        </Modal>
+      )}
+    </AppContainer>
+  );
 }
 
 export default App;

@@ -5,16 +5,22 @@ import {
   ImageGalleryItemImage,
 } from './ImageGalleryItem.styled';
 
-const ImageGalleryItem = ({ webformatURL, onClick }) => (
-  <ImageGalleryItemStyle className="ImageGalleryItem">
-    <ImageGalleryItemImage
-      src={webformatURL}
-      alt=""
-      className="ImageGalleryItem-image"
-      onClick={onClick}
-    />
-  </ImageGalleryItemStyle>
-);
+const ImageGalleryItem = ({ webformatURL, onClick }) => {
+  const handleClick = () => {
+    onClick(webformatURL);
+  };
+
+  return (
+    <ImageGalleryItemStyle className="ImageGalleryItem">
+      <ImageGalleryItemImage
+        src={webformatURL}
+        alt=""
+        className="ImageGalleryItem-image"
+        onClick={handleClick}
+      />
+    </ImageGalleryItemStyle>
+  );
+};
 
 ImageGalleryItem.propTypes = {
   webformatURL: PropTypes.string.isRequired,

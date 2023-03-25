@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
 SearchFormInput,
@@ -8,51 +8,43 @@ SearchFormButton,
 SearchFormButtonLabel,
 } from './Searchbar.style';
 
-class Searchbar extends React.Component {
-static propTypes = {
-onSubmit: PropTypes.func.isRequired,
+function Searchbar({ onSubmit }) {
+const [query, setQuery] = useState('');
+
+const handleChange = e => {
+setQuery(e.target.value);
 };
 
-state = {
-query: '',
-};
-
-handleChange = e => {
-this.setState({ query: e.target.value });
-};
-
-handleSubmit = e => {
+const handleSubmit = e => {
 e.preventDefault();
-this.props.onSubmit(this.state.query);
-this.setState({ query: '' });
+onSubmit(query);
+setQuery('');
 };
 
-render() {
-const { query } = this.state;
 return (
 <SearchbarContainer className="Searchbar">
-<SearchFormContainer
-       className="SearchForm"
-       onSubmit={this.handleSubmit}
-     >
+<SearchFormContainer className="SearchForm" onSubmit={handleSubmit}>
 <SearchFormButton type="submit" className="SearchForm-button">
 <SearchFormButtonLabel className="SearchForm-button-label">
 Search
 </SearchFormButtonLabel>
 </SearchFormButton>
 <SearchFormInput
-        className="SearchForm-input"
-        type="text"
-        autoComplete="off"
-        autoFocus
-        placeholder="Search images and photos"
-        value={query}
-        onChange={this.handleChange}
-      />
-    </SearchFormContainer>
-  </SearchbarContainer>
+       className="SearchForm-input"
+       type="text"
+       autoComplete="off"
+       autoFocus
+       placeholder="Search images and photos"
+       value={query}
+       onChange={handleChange}
+     />
+</SearchFormContainer>
+</SearchbarContainer>
 );
 }
-}
+
+Searchbar.propTypes = {
+onSubmit: PropTypes.func.isRequired,
+};
 
 export default Searchbar;
