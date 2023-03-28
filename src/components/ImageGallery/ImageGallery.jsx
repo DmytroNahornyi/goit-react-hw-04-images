@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import ImageGalleryItem from '../ImageGalleryItem/ImageGalleryItem';
 import Modal from '../Modal/Modal';
@@ -7,15 +7,23 @@ import { ImageGalleryStyle } from './ImageGallery.styled';
 function ImageGallery({ images }) {
   const [selectedImage, setSelectedImage] = useState(null);
 
-  const handleImageClick = useCallback((image) => {
+  const handleImageClick = useCallback(image => {
     setSelectedImage(image);
   }, []);
 
-  const handleKeyDown = useCallback((e) => {
+  const handleKeyDown = useCallback(e => {
     if (e.code === 'Escape') {
       setSelectedImage(null);
     }
   }, []);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
 
   if (images.length === 0) {
     return null;

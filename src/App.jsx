@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Searchbar from './components/Searchbar/Searchbar';
 import ImageGallery from './components/ImageGallery/ImageGallery';
 import Loader from './components/Loader/Loader';
@@ -7,7 +7,7 @@ import Modal from './components/Modal/Modal';
 import { fetchImages } from './components/utils/pixabayApi';
 import { AppContainer } from './components/Global.styled';
 
-function App() {
+const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [images, setImages] = useState([]);
@@ -21,10 +21,10 @@ function App() {
       setIsLoading(true);
 
       fetchImages(searchQuery, page)
-        .then((data) => {
-          setImages((prevImages) => [...prevImages, ...data]);
+        .then(data => {
+          setImages(prevState => [...prevState, ...data]);
         })
-        .catch((error) => {
+        .catch(error => {
           console.log(error);
         })
         .finally(() => {
@@ -33,34 +33,30 @@ function App() {
     }
   }, [searchQuery, page]);
 
-  // const toggleModal = () => {
-  //   setShowModal((prevShowModal) => !prevShowModal);
-  // };
-
-  const handleOpenModal = (largeImageURL) => {
-    setLargeImageURL(largeImageURL);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedImage(null);
-    setShowModal(false);
-    setLargeImageURL('');
-  };
-
-  const handleSearchFormSubmit = (query) => {
+  const handleSearchFormSubmit = useCallback(query => {
     setSearchQuery(query);
     setPage(1);
     setImages([]);
-  };
+  }, []);
 
-  const handleLoadMoreBtnClick = () => {
-    setPage((prevPage) => prevPage + 1);
-  };
+  const handleLoadMoreBtnClick = useCallback(() => {
+    setPage(prevPage => prevPage + 1);
+  }, []);
 
-  // const handleImageClick = (image) => {
+  // const handleImageClick = useCallback(image => {
   //   setSelectedImage(image);
   //   setShowModal(true);
-  // };
+  // }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setSelectedImage(null);
+    setShowModal(false);
+    setLargeImageURL('');
+  }, []);
+
+  const handleOpenModal = useCallback(largeImageURL => {
+    setLargeImageURL(largeImageURL);
+  }, []);
 
   return (
     <AppContainer>
@@ -80,6 +76,6 @@ function App() {
       )}
     </AppContainer>
   );
-}
+};
 
 export default App;
